@@ -8,8 +8,13 @@
 using namespace std;
 
 struct Contact {
-    int contact_id;
+    int contact_id, user_id;
     string contact_name, contact_surname, contact_phone_number, contact_email, contact_address;
+};
+
+struct User {
+    int user_id;
+    string user_name, user_password;
 };
 
 string get_in_line() {
@@ -57,6 +62,34 @@ void convert_string_to_vector (vector <string> &vector_out, string string_in) {
     }
 }
 
+int open_user_login_interface (vector <User> &users){
+   int actual_user_id = 0;
+
+   while (true) {
+        system("cls");
+        cout << ">>> Address Book <<<" << endl << endl;
+        cout << ">>> Log In Interface <<<" << endl << endl;
+        cout << "1. Add new user " << endl;
+        cout << "2. Log In " << endl;
+        cout << "9. Close " << endl;
+
+        cout << "Your choice: ";
+        char menu_choice = get_in_char();
+
+        switch(menu_choice) {
+        case '1':
+            //remove_contact (contacts);
+            break;
+        case '2':
+            //edit_contact (contacts);
+            break;
+        case '9':
+            exit(0);
+        }
+    }
+    return actual_user_id;
+}
+
 int extract_contact_from_file_to_vector (vector <Contact> &contacts, string file_line) {
     Contact contact;
     vector <string> extracted_vector;
@@ -64,11 +97,12 @@ int extract_contact_from_file_to_vector (vector <Contact> &contacts, string file
     convert_string_to_vector (extracted_vector, file_line);
 
     contact.contact_id = stoi(extracted_vector[0]);
-    contact.contact_name = extracted_vector[1];
-    contact.contact_surname = extracted_vector[2];
-    contact.contact_phone_number = extracted_vector[3];
-    contact.contact_email = extracted_vector[4];
-    contact.contact_address = extracted_vector[5];
+    contact.user_id = stoi(extracted_vector[1]);
+    contact.contact_name = extracted_vector[2];
+    contact.contact_surname = extracted_vector[3];
+    contact.contact_phone_number = extracted_vector[4];
+    contact.contact_email = extracted_vector[5];
+    contact.contact_address = extracted_vector[6];
 
     contacts.push_back(contact);
     return contact.contact_id;
@@ -103,7 +137,7 @@ int add_new_contact_to_file (Contact contact) {
         Sleep(1500);
         return 0;
     }
-    address_book_file << contact.contact_id << "|" << contact.contact_name << "|" << contact.contact_surname
+    address_book_file << contact.contact_id << "|" << contact.user_id << "|" << contact.contact_name << "|" << contact.contact_surname
                       << "|" << contact.contact_phone_number << "|" << contact.contact_email << "|" <<contact.contact_address << "|" << endl;
 
     address_book_file.close();
@@ -312,7 +346,9 @@ void edit_contact (vector <Contact> &contacts) {
 
 int main() {
     vector <Contact> contacts;
+    //vector <User> users;
 
+    //int user_id = open_user_login_interface (users);
     int id_counter = open_source_file (contacts);
 
     while (true) {
@@ -324,14 +360,14 @@ int main() {
         cout << "4. Show all " << endl;
         cout << "5. Remove contact " << endl;
         cout << "6. Edit contact " << endl;
-        cout << "9. Exit" << endl << endl;
+        cout << "9. Log out" << endl << endl; // add logout function
 
         cout << "Your choice: ";
         char menu_choice = get_in_char();
 
         switch(menu_choice) {
         case '1':
-            id_counter = add_new_contact (contacts, id_counter);
+            id_counter = add_new_contact (contacts, id_counter); //add user_id to work
             break;
         case '2':
             find_by_name (contacts);
@@ -349,7 +385,7 @@ int main() {
             edit_contact (contacts);
             break;
         case '9':
-            exit(0);
+            exit(0);  // change function
         }
     }
     return 0;
