@@ -163,8 +163,6 @@ void fill_out_working_space (vector <Contact> &contacts, vector <Contact> &worki
 
     for (size_t i = 0; i < contacts.size(); i++) {
         if (contacts[i].user_id == actual_user_id) {
-            cout << "Znaelziono" << endl << endl;
-            system("pause");
             contact = contacts[i];
             working_contacts.push_back(contact);
         }
@@ -347,9 +345,10 @@ void update_txt_file (vector <Contact> &contacts) {
     address_book_file.close();
 }
 
-void remove_contact (vector <Contact> &contacts, vector <Contact> &working_contacts) {
+void remove_contact (vector <Contact> &contacts, vector <Contact> &working_contacts, int logged_user_id) {
     int erased_id = 0, erased_position = 0;
     bool find_status = false;
+    bool access_status = false;
     string deleted_name = "", deleted_surname = "";
 
     cout << "Please enter ID to remove: " << endl;
@@ -357,22 +356,29 @@ void remove_contact (vector <Contact> &contacts, vector <Contact> &working_conta
 
     for (size_t i = 0; i < contacts.size(); i++) {
         if (contacts[i].contact_id == erased_id) {
-            deleted_name = contacts[i].contact_name;
-            deleted_surname = contacts[i].contact_surname;
-            find_status = true;
+                find_status = true;
+                if (contacts[i].user_id == logged_user_id){
+                    access_status = true;
+                    deleted_name = contacts[i].contact_name;
+                    deleted_surname = contacts[i].contact_surname;
+                }
             break;
         } else {
             erased_position ++;
         }
     }
-    if (find_status == true) {
+    if (access_status == true) {
         contacts.erase(contacts.begin() + erased_position);
         cout << "Deleted ID: " << erased_id << endl;
         cout << "Say bye bye to: " << deleted_name << " "<< deleted_surname << " We will miss you <3"<< endl << endl;
         update_txt_file (contacts);
+        working_contacts.clear();
+        fill_out_working_space (contacts, working_contacts, logged_user_id);
+    } else if (find_status == true && access_status == false){
+        cout << "You can't remove this user !!!" << endl;
     } else {
         cout << "There is no contact with entered ID !!!" << endl;
-    }
+        }
     system("pause");
 }
 
@@ -485,7 +491,7 @@ void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_
             show_all_contacts (working_contacts);
             break;
         case '5':
-            remove_contact (contacts, working_contacts); //add remove function
+            remove_contact (contacts, working_contacts, logged_user_id); //add remove function
             break;
         case '6':
             edit_contact (contacts, working_contacts);  //add edit function
