@@ -339,7 +339,7 @@ void update_txt_file (vector <Contact> &contacts) {
     fstream address_book_file;
     address_book_file.open("address_book_file.txt", ios::out | ios::app);
     for (size_t i = 0; i < contacts.size(); i++) {
-        address_book_file << contacts[i].contact_id << "|" << contacts[i].contact_name << "|" << contacts[i].contact_surname
+        address_book_file << contacts[i].contact_id << "|" << contacts[i].user_id << "|" << contacts[i].contact_name << "|" << contacts[i].contact_surname
                           << "|" << contacts[i].contact_phone_number << "|" << contacts[i].contact_email << "|" <<contacts[i].contact_address << "|" << endl;
     }
     address_book_file.close();
@@ -390,7 +390,6 @@ string parameter_edition (string parameter_to_edit) {
 }
 
 bool edition_menu_for_contact (vector <Contact> &contacts, int position_to_edit, bool edition_status) {
-    // task: correct the way files updating
     while (true) {
         system("cls");
         cout << ">>> Editors menu <<<" << endl << endl;
@@ -434,27 +433,35 @@ bool edition_menu_for_contact (vector <Contact> &contacts, int position_to_edit,
     return edition_status;
 }
 
-void edit_contact (vector <Contact> &contacts, vector <Contact> &working_contacts) {
-    // task: correct the way files updating
+void edit_contact (vector <Contact> &contacts, vector <Contact> &working_contacts, int logged_user_id) {
     int id_to_edit = 0, position_to_edit = 0;
     bool find_status = false;
     bool edition_status = false;
+    bool access_status = false;
 
     cout << "Please enter ID to edit: " << endl;
     id_to_edit = get_in_number();
 
     for (size_t i = 0; i < contacts.size(); i++) {
         if (contacts[i].contact_id == id_to_edit) {
-            find_status = true;
-            position_to_edit = i;
-            break;
+            if (contacts[i].user_id == logged_user_id){
+                find_status = true;
+                access_status = true;
+                position_to_edit = i;
+                break;
+            } else {
+                    find_status = true;
+                    cout << "You cant edit this contact !!!" << endl;
+                    }
+                }
         }
-    }
-    if (find_status == true) {
-        edition_status = edition_menu_for_contact (contacts, position_to_edit, edition_status); // task: correct the way files updating
-        update_txt_file (contacts); // task: correct the way files updating
+    if (access_status == true) {
+        edition_status = edition_menu_for_contact (contacts, position_to_edit, edition_status);
+        update_txt_file (contacts);
+        working_contacts.clear();
+        fill_out_working_space (contacts, working_contacts, logged_user_id);
         if (edition_status == true) cout << "Successfully edited ID: " << id_to_edit << endl;
-    } else {
+    } else if (access_status == false && find_status == false){
         cout << "There is no contact with entered ID !!!" << endl;
     }
     system("pause");
@@ -491,10 +498,10 @@ void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_
             show_all_contacts (working_contacts);
             break;
         case '5':
-            remove_contact (contacts, working_contacts, logged_user_id); //add remove function
+            remove_contact (contacts, working_contacts, logged_user_id); 
             break;
         case '6':
-            edit_contact (contacts, working_contacts);  //add edit function
+            edit_contact (contacts, working_contacts, logged_user_id);
             break;
         case '9':
             working_contacts.clear();
