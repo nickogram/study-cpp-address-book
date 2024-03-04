@@ -62,32 +62,143 @@ void convert_string_to_vector (vector <string> &vector_out, string string_in) {
     }
 }
 
-int open_user_login_interface (vector <User> &users){
+int extract_user_from_file_to_vector (vector <User> &users, string file_line) {
+    User user;
+    vector <string> extracted_vector;
+
+    convert_string_to_vector (extracted_vector, file_line);
+
+    user.user_id = stoi(extracted_vector[0]);
+    user.user_name = extracted_vector[1];
+    user.user_password = extracted_vector[2];
+
+    users.push_back(user);
+    return user.user_id;
+}
+
+int open_source_file_with_users (vector <User> &users){
+    User user;
+    vector <string> users_data_file_line_vector;
+    string users_data_file_line;
+    int users_file_line_number = 1, id_counter = 0;
+
+    fstream users_data_file;
+    users_data_file.open ("users_data_file.txt", ios::in | ios::app);
+
+    if (users_data_file_line == "") {
+        id_counter = 0;
+    }
+    while (getline(users_data_file, users_data_file_line)) {
+        id_counter = extract_user_from_file_to_vector (users, users_data_file_line);
+        users_file_line_number++;
+    }
+    users_data_file.close();
+    return id_counter;
+}
+
+void add_new_user_to_file (User user) {
+    fstream users_data_file;
+    users_data_file.open("users_data_file.txt", ios::out | ios::app);
+
+    if (!users_data_file.good()) {
+        cout << "There is a problem with file!" << endl;
+        Sleep(1500);
+    }
+    users_data_file << user.user_id << "|" << user.user_name << "|" << user.user_password << "|"  << endl;
+
+    users_data_file.close();
+}
+
+int add_new_user (vector <User> &users, int new_user_id ){
+    User user;
+    user.user_id = new_user_id + 1;
+    cout << "Enter data for the new user!" << endl;
+    cout << "Username: ";
+    user.user_name = get_in_line();
+    cout << "Now create a password: ";
+    user.user_password = get_in_line();
+
+    add_new_user_to_file (user);
+
+    cout << "Please remember this details to log in --> " + user.user_name + " " + user.user_password << endl;
+    system("pause");
+
+    users.push_back(user);
+
+    return user.user_id;
+}
+
+int log_in_user (vector <User> &users){
+    int actual_user_id = 0;
+
+    cout << "Enter a Username to log in: ";
+    string check_user_name = get_in_line();
+    bool check_user_name_status = false;
+    bool check_user_password_status = false;
+
+    for (size_t i = 0; i < users.size(); i++) {
+        if (users[i].user_name == check_user_name) {
+            check_user_name_status = true;
+            cout << "Enter a password: ";
+            string check_user_password = get_in_line();
+            if (users[i].user_password == check_user_password){
+                check_user_password_status = true;
+                cout << endl << "Logged in succesfully :) "<< endl << endl;
+                actual_user_id = users[i].user_id;
+            }
+        }
+    }
+    if (check_user_name_status == false) {
+        cout << endl << "Entered nickname was not found! :( " << endl << endl;
+    }
+    else if (check_user_password_status == false){
+        cout << endl << "Wrong password! :( " << endl << endl;
+    }
+    system("pause");
+    return actual_user_id;
+}
+
+void fill_out_working_space (vector <Contact> &contacts, vector <Contact> &working_contacts, int actual_user_id){
+    Contact contact;
+
+    for (size_t i = 0; i < contacts.size(); i++) {
+        if (contacts[i].user_id == actual_user_id) {
+            cout << "Znaelziono" << endl << endl;
+            system("pause");
+            contact = contacts[i];
+            working_contacts.push_back(contact);
+        }
+    }
+}
+
+int open_user_login_interface (vector <User> users, vector <Contact> &contacts, vector <Contact> &working_contacts){
    int actual_user_id = 0;
+   int user_id_counter = open_source_file_with_users (users);
 
    while (true) {
         system("cls");
-        cout << ">>> Address Book <<<" << endl << endl;
+        cout << ">>>   Address Book   <<<" << endl << endl;
         cout << ">>> Log In Interface <<<" << endl << endl;
         cout << "1. Add new user " << endl;
-        cout << "2. Log In " << endl;
-        cout << "9. Close " << endl;
+        cout << "2. Log In " << endl << endl;
+        cout << "9. Close " << endl << endl;
 
         cout << "Your choice: ";
         char menu_choice = get_in_char();
 
         switch(menu_choice) {
         case '1':
-            //remove_contact (contacts);
+            user_id_counter = add_new_user (users, user_id_counter);
             break;
         case '2':
-            //edit_contact (contacts);
+            actual_user_id = log_in_user (users);
+            fill_out_working_space (contacts, working_contacts, actual_user_id);
+            if (actual_user_id != 0) return actual_user_id;
             break;
         case '9':
             exit(0);
         }
     }
-    return actual_user_id;
 }
 
 int extract_contact_from_file_to_vector (vector <Contact> &contacts, string file_line) {
@@ -108,7 +219,7 @@ int extract_contact_from_file_to_vector (vector <Contact> &contacts, string file
     return contact.contact_id;
 }
 
-int open_source_file (vector <Contact> &contacts) {
+int open_source_file_with_contacts (vector <Contact> &contacts) {
     Contact contact;
     vector <string> address_book_file_line_vector;
     string address_book_file_line;
@@ -128,27 +239,25 @@ int open_source_file (vector <Contact> &contacts) {
     return id_counter;
 }
 
-int add_new_contact_to_file (Contact contact) {
+void add_new_contact_to_file (Contact contact) {
     fstream address_book_file;
     address_book_file.open("address_book_file.txt", ios::out | ios::app);
 
     if (!address_book_file.good()) {
         cout << "There is a problem with file!" << endl;
         Sleep(1500);
-        return 0;
     }
     address_book_file << contact.contact_id << "|" << contact.user_id << "|" << contact.contact_name << "|" << contact.contact_surname
                       << "|" << contact.contact_phone_number << "|" << contact.contact_email << "|" <<contact.contact_address << "|" << endl;
 
     address_book_file.close();
-    return contact.contact_id;
 }
 
-int add_new_contact(vector <Contact> &contacts, int new_contact_id) {
-
+int add_new_contact(vector <Contact> &contacts, int new_contact_id, int logged_user_id) {
     Contact contact;
 
     contact.contact_id = new_contact_id + 1;
+    contact.user_id = logged_user_id;
     cout << "Please enter data for the new friend!" << endl;
     cout << "Name: ";
     contact.contact_name = get_in_line();
@@ -238,7 +347,7 @@ void update_txt_file (vector <Contact> &contacts) {
     address_book_file.close();
 }
 
-void remove_contact (vector <Contact> &contacts) {
+void remove_contact (vector <Contact> &contacts, vector <Contact> &working_contacts) {
     int erased_id = 0, erased_position = 0;
     bool find_status = false;
     string deleted_name = "", deleted_surname = "";
@@ -275,7 +384,7 @@ string parameter_edition (string parameter_to_edit) {
 }
 
 bool edition_menu_for_contact (vector <Contact> &contacts, int position_to_edit, bool edition_status) {
-
+    // task: correct the way files updating
     while (true) {
         system("cls");
         cout << ">>> Editors menu <<<" << endl << endl;
@@ -319,7 +428,8 @@ bool edition_menu_for_contact (vector <Contact> &contacts, int position_to_edit,
     return edition_status;
 }
 
-void edit_contact (vector <Contact> &contacts) {
+void edit_contact (vector <Contact> &contacts, vector <Contact> &working_contacts) {
+    // task: correct the way files updating
     int id_to_edit = 0, position_to_edit = 0;
     bool find_status = false;
     bool edition_status = false;
@@ -335,8 +445,8 @@ void edit_contact (vector <Contact> &contacts) {
         }
     }
     if (find_status == true) {
-        edition_status = edition_menu_for_contact (contacts, position_to_edit, edition_status);
-        update_txt_file (contacts);
+        edition_status = edition_menu_for_contact (contacts, position_to_edit, edition_status); // task: correct the way files updating
+        update_txt_file (contacts); // task: correct the way files updating
         if (edition_status == true) cout << "Successfully edited ID: " << id_to_edit << endl;
     } else {
         cout << "There is no contact with entered ID !!!" << endl;
@@ -344,49 +454,59 @@ void edit_contact (vector <Contact> &contacts) {
     system("pause");
 }
 
-int main() {
-    vector <Contact> contacts;
-    //vector <User> users;
-
-    //int user_id = open_user_login_interface (users);
-    int id_counter = open_source_file (contacts);
+void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_contacts, vector <User> users, int logged_user_id, int id_counter){
 
     while (true) {
         system("cls");
         cout << ">>> Address Book <<<" << endl << endl;
+        cout << "Logged In --> " << logged_user_id << endl << endl;
         cout << "1. Add new contact " << endl;
         cout << "2. Find by name " << endl;
         cout << "3. Find by surname " << endl;
         cout << "4. Show all " << endl;
         cout << "5. Remove contact " << endl;
         cout << "6. Edit contact " << endl;
-        cout << "9. Log out" << endl << endl; // add logout function
+        cout << "9. Log out" << endl << endl;
 
         cout << "Your choice: ";
         char menu_choice = get_in_char();
 
         switch(menu_choice) {
         case '1':
-            id_counter = add_new_contact (contacts, id_counter); //add user_id to work
+            id_counter = add_new_contact (working_contacts, id_counter, logged_user_id);
             break;
         case '2':
-            find_by_name (contacts);
+            find_by_name (working_contacts);
             break;
         case '3':
-            find_by_surname (contacts);
+            find_by_surname (working_contacts);
             break;
         case '4':
-            show_all_contacts (contacts);
+            show_all_contacts (working_contacts);
             break;
         case '5':
-            remove_contact (contacts);
+            remove_contact (contacts, working_contacts); //add remove function
             break;
         case '6':
-            edit_contact (contacts);
+            edit_contact (contacts, working_contacts);  //add edit function
             break;
         case '9':
-            exit(0);  // change function
+            working_contacts.clear();
+            logged_user_id = open_user_login_interface (users, contacts, working_contacts);
+            break;
         }
     }
+}
+
+int main() {
+    vector <Contact> contacts;
+    vector <Contact> working_contacts;
+    vector <User> users;
+
+    int id_counter = open_source_file_with_contacts (contacts);
+    int logged_user_id = open_user_login_interface (users, contacts, working_contacts);
+
+    main_menu_interface (contacts, working_contacts, users, logged_user_id, id_counter);
+
     return 0;
 }
