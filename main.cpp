@@ -76,7 +76,7 @@ int extract_user_from_file_to_vector (vector <User> &users, string file_line) {
     return user.user_id;
 }
 
-int open_source_file_with_users (vector <User> &users){
+int open_source_file_with_users (vector <User> &users) {
     User user;
     vector <string> users_data_file_line_vector;
     string users_data_file_line;
@@ -109,7 +109,7 @@ void add_new_user_to_file (User user) {
     users_data_file.close();
 }
 
-int add_new_user (vector <User> &users, int new_user_id ){
+int add_new_user (vector <User> &users, int new_user_id ) {
     User user;
     user.user_id = new_user_id + 1;
     cout << "Enter data for the new user!" << endl;
@@ -128,7 +128,7 @@ int add_new_user (vector <User> &users, int new_user_id ){
     return user.user_id;
 }
 
-int log_in_user (vector <User> &users){
+int log_in_user (vector <User> &users) {
     int actual_user_id = 0;
 
     cout << endl << "Enter a Username to log in: ";
@@ -141,7 +141,7 @@ int log_in_user (vector <User> &users){
             check_user_name_status = true;
             cout << endl << "Enter a password: ";
             string check_user_password = get_in_line();
-            if (users[i].user_password == check_user_password){
+            if (users[i].user_password == check_user_password) {
                 check_user_password_status = true;
                 cout << endl << "Logged in succesfully :) "<< endl << endl;
                 actual_user_id = users[i].user_id;
@@ -150,15 +150,14 @@ int log_in_user (vector <User> &users){
     }
     if (check_user_name_status == false) {
         cout << endl << "Entered nickname was not found! :( " << endl << endl;
-    }
-    else if (check_user_password_status == false){
+    } else if (check_user_password_status == false) {
         cout << endl << "Wrong password! :( " << endl << endl;
     }
     system("pause");
     return actual_user_id;
 }
 
-void fill_out_working_space (vector <Contact> &contacts, vector <Contact> &working_contacts, int actual_user_id){
+void fill_out_working_space (vector <Contact> &contacts, vector <Contact> &working_contacts, int actual_user_id) {
     Contact contact;
 
     for (size_t i = 0; i < contacts.size(); i++) {
@@ -169,20 +168,22 @@ void fill_out_working_space (vector <Contact> &contacts, vector <Contact> &worki
     }
 }
 
-int open_user_login_interface (vector <User> users, vector <Contact> &contacts, vector <Contact> &working_contacts){
-   int actual_user_id = 0;
-   int user_id_counter = open_source_file_with_users (users);
+int open_user_login_interface (vector <User> &users, vector <Contact> &contacts, vector <Contact> &working_contacts) {
+    int actual_user_id = 0;
+    int user_id_counter = open_source_file_with_users (users);
 
-   while (true) {
+    while (true) {
         system("cls");
         cout << ">>>   Address Book   <<<" << endl;
+        cout << "Users capacity: " << users.size() << endl; // delete after
         cout << "------------------------" << endl;
         cout << ">>> Log In Interface <<<" << endl;
         cout << "------------------------" << endl << endl;
         cout << "1. Add new user " << endl;
         cout << "2. Log In " << endl << endl;
-        cout << "9. Close " << endl << endl;
-
+        cout << "------------------------" << endl;
+        cout << "9. Close " << endl;
+        cout << "------------------------" << endl << endl;
         cout << "Your choice: ";
         char menu_choice = get_in_char();
 
@@ -348,6 +349,18 @@ void update_txt_file (vector <Contact> &contacts) {
     address_book_file.close();
 }
 
+void update_txt_file_users (vector <User> &users) {
+    char file_name[] = "users_data_file.txt";
+    remove (file_name);
+
+    fstream users_data_file;
+    users_data_file.open("users_data_file.txt", ios::out | ios::app);
+    for (size_t i = 0; i < users.size(); i++) {
+        users_data_file << users[i].user_id << "|" << users[i].user_name << "|" << users[i].user_password << "|" << endl;
+    }
+    users_data_file.close();
+}
+
 void remove_contact (vector <Contact> &contacts, vector <Contact> &working_contacts, int logged_user_id) {
     int erased_id = 0, erased_position = 0;
     bool find_status = false;
@@ -359,12 +372,12 @@ void remove_contact (vector <Contact> &contacts, vector <Contact> &working_conta
 
     for (size_t i = 0; i < contacts.size(); i++) {
         if (contacts[i].contact_id == erased_id) {
-                find_status = true;
-                if (contacts[i].user_id == logged_user_id){
-                    access_status = true;
-                    deleted_name = contacts[i].contact_name;
-                    deleted_surname = contacts[i].contact_surname;
-                }
+            find_status = true;
+            if (contacts[i].user_id == logged_user_id) {
+                access_status = true;
+                deleted_name = contacts[i].contact_name;
+                deleted_surname = contacts[i].contact_surname;
+            }
             break;
         } else {
             erased_position ++;
@@ -377,11 +390,11 @@ void remove_contact (vector <Contact> &contacts, vector <Contact> &working_conta
         update_txt_file (contacts);
         working_contacts.clear();
         fill_out_working_space (contacts, working_contacts, logged_user_id);
-    } else if (find_status == true && access_status == false){
-        cout << "You can't remove this user !!!" << endl;
+    } else if (find_status == true && access_status == false) {
+        cout << "You can't remove this contact !!!" << endl;
     } else {
         cout << "There is no contact with entered ID !!!" << endl;
-        }
+    }
     system("pause");
 }
 
@@ -447,30 +460,66 @@ void edit_contact (vector <Contact> &contacts, vector <Contact> &working_contact
 
     for (size_t i = 0; i < contacts.size(); i++) {
         if (contacts[i].contact_id == id_to_edit) {
-            if (contacts[i].user_id == logged_user_id){
+            if (contacts[i].user_id == logged_user_id) {
                 find_status = true;
                 access_status = true;
                 position_to_edit = i;
                 break;
             } else {
-                    find_status = true;
-                    cout << "You cant edit this contact !!!" << endl;
-                    }
-                }
+                find_status = true;
+                cout << "You cant edit this contact !!!" << endl;
+            }
         }
+    }
     if (access_status == true) {
         edition_status = edition_menu_for_contact (contacts, position_to_edit, edition_status);
         update_txt_file (contacts);
         working_contacts.clear();
         fill_out_working_space (contacts, working_contacts, logged_user_id);
         if (edition_status == true) cout << "Successfully edited ID: " << id_to_edit << endl;
-    } else if (access_status == false && find_status == false){
+    } else if (access_status == false && find_status == false) {
         cout << "There is no contact with entered ID !!!" << endl;
     }
     system("pause");
 }
 
-void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_contacts, vector <User> &users, int logged_user_id, int id_counter){
+void change_password (vector <User> &users, int logged_user_id) {
+    string new_password ="";
+    bool password_change_status = false;
+    cout << "------------------------" << endl;
+    cout << ">>> Change password  <<<" << endl;
+    cout << "------------------------" << endl;
+    cout << "Set new password: ";
+    new_password = get_in_line();
+
+    for (size_t i = 0; i < users.size(); i++) {
+        if (users[i].user_id == logged_user_id) {
+            users[i].user_password = new_password;
+            password_change_status = true;
+        }
+    }
+    if (password_change_status == true) {
+        cout << "Great job! Now you have a new password!!! " << endl;
+        update_txt_file_users (users);
+    } else {
+        cout << "Something goes wrong! Your password has not changed !!! " << endl;
+    }
+    system("pause");
+}
+
+string find_user_name (vector <User> &users, int logged_user_id) {
+    string finded_user_name = "";
+    for (size_t i = 0; i < users.size(); i++) {
+        if (users[i].user_id == logged_user_id) {
+            finded_user_name = users[i].user_name;
+        }
+    }
+    return finded_user_name;
+}
+
+void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_contacts, vector <User> &users, int logged_user_id, int id_counter) {
+    string logged_user_name ="";
+    logged_user_name = find_user_name (users, logged_user_id);
 
     while (true) {
         system("cls");
@@ -478,18 +527,19 @@ void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_
         cout << "------------------------" << endl;
         cout << ">>>    Main menu     <<<" << endl;
         cout << "------------------------" << endl;
-        cout << "Logged In --> ID: " << logged_user_id << endl;
+        cout << "Logged --> " << logged_user_name << endl;
         cout << "------------------------" << endl << endl;
         cout << "1. Add new contact " << endl;
         cout << "2. Find by name " << endl;
         cout << "3. Find by surname " << endl;
         cout << "4. Show all " << endl;
         cout << "5. Remove contact " << endl;
-        cout << "6. Edit contact " << endl;
-        cout << "------------------------" << endl << endl;
+        cout << "6. Edit contact " << endl << endl;
+        cout << "------------------------" << endl;
         cout << "7. Change password " << endl;
+        cout << "------------------------" << endl;
+        cout << "9. Log out" << endl;
         cout << "------------------------" << endl << endl;
-        cout << "9. Log out" << endl << endl;
 
         cout << "Your choice: ";
         char menu_choice = get_in_char();
@@ -514,10 +564,11 @@ void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_
             edit_contact (contacts, working_contacts, logged_user_id);
             break;
         case '7':
-            //change password function
+            change_password (users, logged_user_id);
             break;
         case '9':
             working_contacts.clear();
+            users.clear();
             logged_user_id = open_user_login_interface (users, contacts, working_contacts);
             break;
         }
