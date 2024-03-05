@@ -131,7 +131,7 @@ int add_new_user (vector <User> &users, int new_user_id ){
 int log_in_user (vector <User> &users){
     int actual_user_id = 0;
 
-    cout << "Enter a Username to log in: ";
+    cout << endl << "Enter a Username to log in: ";
     string check_user_name = get_in_line();
     bool check_user_name_status = false;
     bool check_user_password_status = false;
@@ -139,7 +139,7 @@ int log_in_user (vector <User> &users){
     for (size_t i = 0; i < users.size(); i++) {
         if (users[i].user_name == check_user_name) {
             check_user_name_status = true;
-            cout << "Enter a password: ";
+            cout << endl << "Enter a password: ";
             string check_user_password = get_in_line();
             if (users[i].user_password == check_user_password){
                 check_user_password_status = true;
@@ -175,8 +175,10 @@ int open_user_login_interface (vector <User> users, vector <Contact> &contacts, 
 
    while (true) {
         system("cls");
-        cout << ">>>   Address Book   <<<" << endl << endl;
-        cout << ">>> Log In Interface <<<" << endl << endl;
+        cout << ">>>   Address Book   <<<" << endl;
+        cout << "------------------------" << endl;
+        cout << ">>> Log In Interface <<<" << endl;
+        cout << "------------------------" << endl << endl;
         cout << "1. Add new user " << endl;
         cout << "2. Log In " << endl << endl;
         cout << "9. Close " << endl << endl;
@@ -251,7 +253,7 @@ void add_new_contact_to_file (Contact contact) {
     address_book_file.close();
 }
 
-int add_new_contact(vector <Contact> &contacts, int new_contact_id, int logged_user_id) {
+int add_new_contact(vector <Contact> &contacts, vector <Contact> &working_contacts, int new_contact_id, int logged_user_id) {
     Contact contact;
 
     contact.contact_id = new_contact_id + 1;
@@ -274,6 +276,7 @@ int add_new_contact(vector <Contact> &contacts, int new_contact_id, int logged_u
     Sleep(1500);
 
     contacts.push_back(contact);
+    working_contacts.push_back(contact);
 
     return contact.contact_id;
 }
@@ -370,7 +373,7 @@ void remove_contact (vector <Contact> &contacts, vector <Contact> &working_conta
     if (access_status == true) {
         contacts.erase(contacts.begin() + erased_position);
         cout << "Deleted ID: " << erased_id << endl;
-        cout << "Say bye bye to: " << deleted_name << " "<< deleted_surname << " We will miss you <3"<< endl << endl;
+        cout << "Say bye bye to: " << deleted_name << " "<< deleted_surname << endl << " We will miss you <3"<< endl << endl;
         update_txt_file (contacts);
         working_contacts.clear();
         fill_out_working_space (contacts, working_contacts, logged_user_id);
@@ -467,18 +470,25 @@ void edit_contact (vector <Contact> &contacts, vector <Contact> &working_contact
     system("pause");
 }
 
-void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_contacts, vector <User> users, int logged_user_id, int id_counter){
+void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_contacts, vector <User> &users, int logged_user_id, int id_counter){
 
     while (true) {
         system("cls");
-        cout << ">>> Address Book <<<" << endl << endl;
-        cout << "Logged In --> " << logged_user_id << endl << endl;
+        cout << ">>>   Address Book   <<<" << endl;
+        cout << "------------------------" << endl;
+        cout << ">>>    Main menu     <<<" << endl;
+        cout << "------------------------" << endl;
+        cout << "Logged In --> ID: " << logged_user_id << endl;
+        cout << "------------------------" << endl << endl;
         cout << "1. Add new contact " << endl;
         cout << "2. Find by name " << endl;
         cout << "3. Find by surname " << endl;
         cout << "4. Show all " << endl;
         cout << "5. Remove contact " << endl;
         cout << "6. Edit contact " << endl;
+        cout << "------------------------" << endl << endl;
+        cout << "7. Change password " << endl;
+        cout << "------------------------" << endl << endl;
         cout << "9. Log out" << endl << endl;
 
         cout << "Your choice: ";
@@ -486,7 +496,7 @@ void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_
 
         switch(menu_choice) {
         case '1':
-            id_counter = add_new_contact (working_contacts, id_counter, logged_user_id);
+            id_counter = add_new_contact (contacts, working_contacts, id_counter, logged_user_id);
             break;
         case '2':
             find_by_name (working_contacts);
@@ -498,10 +508,13 @@ void main_menu_interface (vector <Contact> &contacts, vector <Contact> &working_
             show_all_contacts (working_contacts);
             break;
         case '5':
-            remove_contact (contacts, working_contacts, logged_user_id); 
+            remove_contact (contacts, working_contacts, logged_user_id);
             break;
         case '6':
             edit_contact (contacts, working_contacts, logged_user_id);
+            break;
+        case '7':
+            //change password function
             break;
         case '9':
             working_contacts.clear();
